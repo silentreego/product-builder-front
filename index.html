@@ -1,14 +1,177 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>로또 번호 생성기 - 5세트</title>
+<style>
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    color: #2c3e50;
+    margin: 0.8em 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .container {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    max-width: 580px;
+    width: 100%;
+  }
+
+  .set {
+    margin: 1.8rem 0;
+    padding: 1.2rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s;
+  }
+
+  .set:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+
+  .numbers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .ball {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.6rem;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+    transition: transform 0.15s;
+  }
+
+  .ball:hover {
+    transform: scale(1.12);
+  }
+
+  /* 색상 구간별 색상 */
+  .ball-1  { background: #fbc02d; }    /* 1~10  */
+  .ball-11 { background: #f57c00; }    /* 11~20 */
+  .ball-21 { background: #e53935; }    /* 21~30 */
+  .ball-31 { background: #3949ab; }    /* 31~40 */
+  .ball-41 { background: #2e7d32; }    /* 41~45 */
+
+  button {
+    background: #6200ea;
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 1.5rem auto;
+    display: block;
+    box-shadow: 0 4px 15px rgba(98,0,234,0.35);
+    transition: all 0.25s;
+  }
+
+  button:hover {
+    background: #3700b3;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(98,0,234,0.45);
+  }
+
+  .footer {
+    margin-top: 2.5rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+</style>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+
+<h1>🎲 로또 6/45 번호 생성기</h1>
+
+<div class="container">
+  <div id="result"></div>
+
+  <button onclick="generateLotto()">새로운 5세트 생성하기</button>
+</div>
+
+<div class="footer">
+  ※ 실제 당첨을 보장하지 않습니다 (당연하지만요😅)
+</div>
+
+<script>
+// 색상 클래스 결정 함수
+function getColorClass(num) {
+  if (num <= 10) return 'ball-1';
+  if (num <= 20) return 'ball-11';
+  if (num <= 30) return 'ball-21';
+  if (num <= 40) return 'ball-31';
+  return 'ball-41';
+}
+
+function generateOneSet() {
+  const numbers = [];
+  while (numbers.length < 6) {
+    const num = Math.floor(Math.random() * 45) + 1;
+    if (!numbers.includes(num)) {
+      numbers.push(num);
+    }
+  }
+  return numbers.sort((a,b) => a-b);
+}
+
+function generateLotto() {
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = '';
+
+  for (let i = 1; i <= 5; i++) {
+    const set = generateOneSet();
+    
+    const setDiv = document.createElement('div');
+    setDiv.className = 'set';
+
+    const title = document.createElement('h3');
+    title.textContent = `${i}번째 세트`;
+    title.style.margin = '0 0 1rem 0';
+    title.style.color = '#444';
+
+    const numbersDiv = document.createElement('div');
+    numbersDiv.className = 'numbers';
+
+    set.forEach(num => {
+      const ball = document.createElement('div');
+      ball.className = `ball ${getColorClass(num)}`;
+      ball.textContent = num;
+      numbersDiv.appendChild(ball);
+    });
+
+    setDiv.appendChild(title);
+    setDiv.appendChild(numbersDiv);
+    resultDiv.appendChild(setDiv);
+  }
+}
+
+// 페이지 로드 시 첫 세트 자동 생성
+window.onload = generateLotto;
+</script>
 </body>
 </html>
