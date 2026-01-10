@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>로또 번호 생성기 - 5세트</title>
+<title>오늘의 메뉴 추천</title>
 <style>
   body {
     font-family: system-ui, -apple-system, sans-serif;
@@ -14,12 +14,22 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  body.dark-mode {
+    background: #121212;
+    color: #e0e0e0;
   }
 
   h1 {
     color: #2c3e50;
     margin: 0.8em 0;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+
+  body.dark-mode h1 {
+    color: #e0e0e0;
   }
 
   .container {
@@ -29,53 +39,31 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.12);
     max-width: 580px;
     width: 100%;
+    text-align: center;
+    transition: background-color 0.3s;
   }
 
-  .set {
-    margin: 1.8rem 0;
-    padding: 1.2rem;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    transition: all 0.2s;
+  body.dark-mode .container {
+    background: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
 
-  .set:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  }
-
-  .numbers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .ball {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.6rem;
+  #menu-result {
+    font-size: 2.5rem;
     font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-    transition: transform 0.15s;
+    color: #6200ea;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 2px dashed #6200ea;
+    border-radius: 10px;
+    display: inline-block;
+    transition: all 0.3s;
   }
 
-  .ball:hover {
-    transform: scale(1.12);
+  body.dark-mode #menu-result {
+    color: #bb86fc;
+    border-color: #bb86fc;
   }
-
-  /* 색상 구간별 색상 */
-  .ball-1  { background: #fbc02d; }    /* 1~10  */
-  .ball-11 { background: #f57c00; }    /* 11~20 */
-  .ball-21 { background: #e53935; }    /* 21~30 */
-  .ball-31 { background: #3949ab; }    /* 31~40 */
-  .ball-41 { background: #2e7d32; }    /* 41~45 */
 
   button {
     background: #6200ea;
@@ -102,76 +90,124 @@
     color: #666;
     font-size: 0.9rem;
   }
+
+  body.dark-mode .footer {
+    color: #888;
+  }
+  
+  .theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .theme-switch {
+    display: inline-block;
+    height: 34px;
+    position: relative;
+    width: 60px;
+  }
+
+  .theme-switch input {
+    display:none;
+  }
+
+  .slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    background-color: #fff;
+    bottom: 4px;
+    content: "";
+    height: 26px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 26px;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #6200ea;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+  
 </style>
 </head>
 <body>
 
-<h1>🎲 로또 6/45 번호 생성기</h1>
+<h1>오늘 뭐 먹지? 🤔</h1>
+
+<div class="theme-switch-wrapper">
+  <span>Dark Mode</span>
+  <label class="theme-switch" for="checkbox">
+    <input type="checkbox" id="checkbox" />
+    <div class="slider round"></div>
+  </label>
+</div>
 
 <div class="container">
-  <div id="result"></div>
+  <div id="result">
+      <span id="menu-result"></span>
+  </div>
 
-  <button onclick="generateLotto()">새로운 5세트 생성하기</button>
+  <button onclick="recommendMenu()">메뉴 추천 받기</button>
 </div>
 
 <div class="footer">
-  ※ 실제 당첨을 보장하지 않습니다 (당연하지만요😅)
+    ※ 오늘의 메뉴를 추천해드립니다.
 </div>
 
 <script>
-// 색상 클래스 결정 함수
-function getColorClass(num) {
-  if (num <= 10) return 'ball-1';
-  if (num <= 20) return 'ball-11';
-  if (num <= 30) return 'ball-21';
-  if (num <= 40) return 'ball-31';
-  return 'ball-41';
-}
-
-function generateOneSet() {
-  const numbers = [];
-  while (numbers.length < 6) {
-    const num = Math.floor(Math.random() * 45) + 1;
-    if (!numbers.includes(num)) {
-      numbers.push(num);
-    }
+// 다크 모드 토글
+const themeSwitch = document.getElementById('checkbox');
+themeSwitch.addEventListener('change', () => {
+  document.body.classList.toggle('dark-mode');
+  if (document.body.classList.contains('dark-mode')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
   }
-  return numbers.sort((a,b) => a-b);
+});
+
+// 저장된 테마 확인
+const currentTheme = localStorage.getItem('theme');
+if (currentTheme === 'dark') {
+  document.body.classList.add('dark-mode');
+  themeSwitch.checked = true;
 }
 
-function generateLotto() {
-  const resultDiv = document.getElementById('result');
-  resultDiv.innerHTML = '';
+const menuItems = [
+    "김치찌개", "된장찌개", "부대찌개", "비빔밥", "칼국수",
+    "수제비", "돈까스", "카레", "짜장면", "짬뽕",
+    "탕수육", "볶음밥", "라면", "떡볶이", "김밥",
+    "순대", "튀김", "제육볶음", "오징어볶음", "불고기",
+    "삼겹살", "치킨", "피자", "햄버거", "샌드위치",
+    "파스타", "리조또", "스테이크", "초밥", "회덮밥",
+    "우동", "소바", "냉면", "갈비탕", "설렁탕"
+];
 
-  for (let i = 1; i <= 5; i++) {
-    const set = generateOneSet();
-    
-    const setDiv = document.createElement('div');
-    setDiv.className = 'set';
-
-    const title = document.createElement('h3');
-    title.textContent = `${i}번째 세트`;
-    title.style.margin = '0 0 1rem 0';
-    title.style.color = '#444';
-
-    const numbersDiv = document.createElement('div');
-    numbersDiv.className = 'numbers';
-
-    set.forEach(num => {
-      const ball = document.createElement('div');
-      ball.className = `ball ${getColorClass(num)}`;
-      ball.textContent = num;
-      numbersDiv.appendChild(ball);
-    });
-
-    setDiv.appendChild(title);
-    setDiv.appendChild(numbersDiv);
-    resultDiv.appendChild(setDiv);
-  }
+function recommendMenu() {
+  const resultSpan = document.getElementById('menu-result');
+  const randomIndex = Math.floor(Math.random() * menuItems.length);
+  const selectedMenu = menuItems[randomIndex];
+  resultSpan.textContent = selectedMenu;
 }
 
-// 페이지 로드 시 첫 세트 자동 생성
-window.onload = generateLotto;
+// 페이지 로드 시 첫 메뉴 자동 추천
+window.onload = recommendMenu;
 </script>
 </body>
 </html>
